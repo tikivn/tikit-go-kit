@@ -11,7 +11,7 @@ import (
 	"github.com/tikivn/tikit-go-kit/grpc/gatewayopt"
 	"github.com/tikivn/tikit-go-kit/l"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 )
 
@@ -62,7 +62,7 @@ func createDefaultGatewayConfig() *gatewayConfig {
 		},
 		MuxOptions: []runtime.ServeMuxOption{
 			gatewayopt.ProtoJSONMarshaler(),
-			runtime.WithProtoErrorHandler(runtime.DefaultHTTPProtoErrorHandler),
+			runtime.WithErrorHandler(runtime.DefaultHTTPErrorHandler),
 		},
 		ServerHandlers: []HTTPServerHandler{
 			PrometheusHandler,

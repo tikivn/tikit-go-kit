@@ -9,20 +9,26 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/golang/protobuf/proto"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/grpc-ecosystem/grpc-gateway/utilities"
-	"google.golang.org/protobuf/runtime/protoiface"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 // DefaultMarshaler return default grpc-gateway marshaler with additional support for emit empty field
 func DefaultMarshaler() runtime.ServeMuxOption {
-	return runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true})
+	return runtime.WithMarshalerOption(runtime.MIMEWildcard,
+		&runtime.JSONPb{
+			MarshalOptions: protojson.MarshalOptions{UseEnumNumbers: true, EmitUnpopulated: true},
+		})
 }
 
 // ProtoJSONMarshaler return the marshaler option with support serialization data with json_name specific
 func ProtoJSONMarshaler() runtime.ServeMuxOption {
-	return runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{EmitDefaults: true})
+	return runtime.WithMarshalerOption(runtime.MIMEWildcard,
+		&runtime.JSONPb{
+			MarshalOptions: protojson.MarshalOptions{EmitUnpopulated: true},
+		})
 }
 
 // Redirect support redirect endpoint for GRPC gateway by using server metadata
@@ -35,7 +41,7 @@ func ProtoJSONMarshaler() runtime.ServeMuxOption {
 //
 // This will redirect endpoint to https://5kbps.io with code 308, by default redirect code is 301.
 func Redirect() runtime.ServeMuxOption {
-	fn := func(ctx context.Context, w http.ResponseWriter, _ protoiface.MessageV1) error {
+	fn := func(ctx context.Context, w http.ResponseWriter, _ proto.Message) error {
 		md, ok := runtime.ServerMetadataFromContext(ctx)
 		if !ok {
 			return nil
@@ -65,7 +71,9 @@ func Redirect() runtime.ServeMuxOption {
 // FormURLEncodedMarshaler is custom Marshaler that supports reading x-www-form-urlencoded mine type
 func FormURLEncodedMarshaler() runtime.ServeMuxOption {
 	return runtime.WithMarshalerOption("application/x-www-form-urlencoded", &formMarshaler{
-		&runtime.JSONPb{EmitDefaults: true},
+		&runtime.JSONPb{
+			MarshalOptions: protojson.MarshalOptions{EmitUnpopulated: true},
+		},
 	})
 }
 
