@@ -1,0 +1,13 @@
+version: v1beta1
+name: buf.build/tikivn/tikit-go-kit
+deps:
+  - buf.build/googleapis/googleapis
+  # - buf.build/gogo/protobuf
+  - buf.build/envoyproxy/protoc-gen-validate
+  - buf.build/grpc-ecosystem/grpc-gateway
+lint:
+  use:
+    - DEFAULT
+breaking:
+  use:
+    - FILE

@@ -1,0 +1,65 @@
+syntax = "proto3";
+package pb;
+
+import "google/api/annotations.proto";
+//import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+//import "github.com/mwitkow/go-proto-validators/validator.proto";
+
+//option (gogoproto.unmarshaler_all) = true;
+//option (gogoproto.sizer_all) = true;
+//option (gogoproto.equal_all) = true;
+//option (gogoproto.marshaler_all) = true;
+
+service HealthService {
+  // service: Services
+  rpc Liveness(LivenessRequest) returns (LivenessResponse) {
+    option (google.api.http) = {
+      get: "/health"
+    };
+  }
+
+  rpc ToggleReadiness(ToggleReadinessRequest) returns (ToggleReadinessResponse) {
+    option (google.api.http) = {
+      post: "/ready"
+    };
+  }
+
+  rpc Readiness(ReadinessRequest) returns (ReadinessResponse) {
+    option (google.api.http) = {
+      get: "/ready"
+    };
+  }
+
+  rpc Version(VersionRequest) returns (VersionResponse) {
+    option (google.api.http) = {
+      get: "/version"
+    };
+  }
+}
+
+
+message VersionRequest {
+
+}
+
+message VersionResponse {
+  string version = 1;
+}
+
+message LivenessRequest {}
+
+message LivenessResponse {
+  string message = 1 [json_name = "message"];
+}
+
+message ToggleReadinessRequest {}
+
+message ToggleReadinessResponse {
+  string message = 1 [json_name = "message"];
+}
+
+message ReadinessRequest {}
+
+message ReadinessResponse {
+  string message = 1 [json_name = "message"];
+}
