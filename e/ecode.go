@@ -55,9 +55,19 @@ func (s Status) GRPCStatus() *status.Status {
 	return s.Err
 }
 
+// Code ...
+func (s Status) Code() codes.Code {
+	return s.Err.Code()
+}
+
+// Message ...
+func (s Status) Message() string {
+	return s.Err.Message()
+}
+
 // Error ...
 func (s *Status) Error() string {
-	if m := s.Err.Message(); m != "" {
+	if m := s.Message(); m != "" {
 		return m
 	}
 
