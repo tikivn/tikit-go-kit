@@ -52,6 +52,7 @@ type gatewayConfig struct {
 	ServerConfig      *HTTPServerConfig
 	ServerMiddlewares []HTTPServerMiddleware
 	ServerHandlers    []HTTPServerHandler
+	muxPaths          []string
 }
 
 func createDefaultGatewayConfig() *gatewayConfig {
@@ -91,6 +92,11 @@ func newGatewayServer(c *gatewayConfig, conn *grpc.ClientConn, servers []Service
 		h(httpMux)
 	}
 
+	for _, svr := range servers {
+		for _, p := range c.muxPaths {
+			httpMux.HandleFunc(p, svr.MuxHandlers)
+		}
+	}
 	httpMux.Handle("/", handler)
 
 	svr := &http.Server{
@@ -102,7 +108,7 @@ func newGatewayServer(c *gatewayConfig, conn *grpc.ClientConn, servers []Service
 	}
 
 	for _, svr := range servers {
-		err := svr.RegisterWithHandler(context.Background(), mux, conn)
+		err := svr.RegisterWithMuxServer(context.Background(), mux, conn)
 		if err != nil {
 			return nil, fmt.Errorf("failed to register handler. %w", err)
 		}

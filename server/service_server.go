@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
@@ -9,7 +10,8 @@ import (
 
 // ServiceServer
 type ServiceServer interface {
-	RegisterWithServer(*grpc.Server)
-	RegisterWithHandler(context.Context, *runtime.ServeMux, *grpc.ClientConn) error
+	RegisterWithGrpcServer(*grpc.Server)
+	RegisterWithMuxServer(context.Context, *runtime.ServeMux, *grpc.ClientConn) error
+	MuxHandlers(http.ResponseWriter, *http.Request)
 	Close(context.Context)
 }

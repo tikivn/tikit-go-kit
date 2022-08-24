@@ -69,6 +69,13 @@ func WithPassedHeader(decider PassedHeaderDeciderFunc) Option {
 	return WithGatewayServerMiddlewares(createPassingHeaderMiddleware(decider))
 }
 
+// WithMuxHandlerPaths set paths for custom mux handlers
+func WithMuxHandlerPaths(paths []string) Option {
+	return func(c *Config) {
+		c.Gateway.muxPaths = paths
+	}
+}
+
 ///-------------------------- GRPC options below--------------------------
 
 // WithGrpcAddr ...
