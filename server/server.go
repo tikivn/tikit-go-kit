@@ -93,43 +93,52 @@ func (s *Server) Stop() {
 }
 
 // Serve starts gRPC and Gateway servers.
-func (s *Server) Serve() error {
+func (s *Server) Serve(ctx context.Context) error {
 	stop := make(chan os.Signal, 1)
-	errch := make(chan error)
+	errCh := make(chan error)
 	signal.Notify(stop, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
 		if err := s.gatewayServer.Serve(); err != nil {
 			ll.Error("Error starting http server, ", l.Error(err))
-			errch <- err
+			errCh <- err
 		}
 	}()
 
 	go func() {
 		if err := s.grpcServer.Serve(); err != nil {
 			ll.Error("Error starting gRPC server, ", l.Error(err))
-			errch <- err
+			errCh <- err
 		}
 	}()
 
 	// shutdown
+	shutdownFunc := func() {
+		ll.Info("Shutting down server")
+
+		isShuttingDown = true
+
+		timeoutCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+		defer cancel()
+		for _, ss := range s.config.ServiceServers {
+			ss.Close(timeoutCtx)
+		}
+
+		s.gatewayServer.Shutdown(ctx)
+		s.grpcServer.Shutdown(ctx)
+	}
+
 	for {
 		select {
 		case <-stop:
-			ll.Info("Shutting down server")
-
-			isShuttingDown = true
-
-			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-			defer cancel()
-			for _, ss := range s.config.ServiceServers {
-				ss.Close(ctx)
-			}
-
-			s.gatewayServer.Shutdown(ctx)
-			s.grpcServer.Shutdown(ctx)
+			shutdownFunc()
 			return nil
-		case err := <-errch:
+
+		case <-ctx.Done():
+			shutdownFunc()
+			return nil
+
+		case err := <-errCh:
 			return err
 		}
 	}

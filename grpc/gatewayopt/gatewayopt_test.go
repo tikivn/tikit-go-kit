@@ -6,6 +6,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type (
@@ -38,7 +39,7 @@ func TestFormMarshaler_NewDecoder(t *testing.T) {
 	// Arrange
 	m := &formMarshaler{
 		JSONPb: &runtime.JSONPb{
-			EmitDefaults: false,
+			MarshalOptions: protojson.MarshalOptions{EmitUnpopulated: true},
 		},
 	}
 
