@@ -80,7 +80,7 @@ type grpcServer struct {
 func newGrpcServer(c *grpcConfig, servers []ServiceServer) *grpcServer {
 	s := grpc.NewServer(c.ServerOptions()...)
 	for _, svr := range servers {
-		svr.RegisterWithServer(s)
+		svr.RegisterWithGrpcServer(s)
 	}
 	return &grpcServer{
 		server: s,
