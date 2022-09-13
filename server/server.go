@@ -118,7 +118,7 @@ func (s *Server) Serve(ctx context.Context) error {
 
 		isShuttingDown = true
 
-		timeoutCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+		timeoutCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
 		defer cancel()
 		for _, ss := range s.config.ServiceServers {
 			ss.Close(timeoutCtx)
