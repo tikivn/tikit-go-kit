@@ -3,13 +3,11 @@ package server
 import (
 	"context"
 	"fmt"
-
-	"github.com/tikivn/tikit-go-kit/l"
-
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_validator "github.com/grpc-ecosystem/go-grpc-middleware/validator"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/tikivn/tikit-go-kit/l"
 	"google.golang.org/grpc"
 )
 

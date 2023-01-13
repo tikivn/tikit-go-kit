@@ -3,15 +3,13 @@ package server
 import (
 	"context"
 	"fmt"
+	"github.com/tikivn/tikit-go-kit/l"
+	"google.golang.org/grpc"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
-
-	"github.com/tikivn/tikit-go-kit/l"
-
-	"google.golang.org/grpc"
 )
 
 var (
@@ -32,7 +30,7 @@ func New(opts ...Option) (*Server, error) {
 	c := createConfig(opts)
 
 	ll.Info("Create grpc server")
-	grpcServer := newGrpcServer(c.Grpc, c.ServiceServers)
+	grpcServerHost := newGrpcServer(c.Grpc, c.ServiceServers)
 	// if err != nil {
 	// 	return nil, fmt.Errorf("Faild to create grpc server. %w", err)
 	// }
@@ -41,19 +39,20 @@ func New(opts ...Option) (*Server, error) {
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1024*1024*50)),
 		grpc.WithChainUnaryInterceptor(),
 	)
+
 	if err != nil {
 		return nil, fmt.Errorf("fail to dial gRPC server. %w", err)
 	}
 
 	ll.Info("Create gateway server")
-	gatewayServer, err := newGatewayServer(c.Gateway, conn, c.ServiceServers)
+	gatewayServerHost, err := newGatewayServer(c.Gateway, conn, c.ServiceServers)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create gateway server. %w", err)
 	}
 
 	return &Server{
-		grpcServer:    grpcServer,
-		gatewayServer: gatewayServer,
+		grpcServer:    grpcServerHost,
+		gatewayServer: gatewayServerHost,
 		config:        c,
 	}, nil
 }

@@ -4,11 +4,11 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/tikivn/tikit-go-kit/grpc/gatewayopt"
 	"net"
 	"net/http"
 	"time"
 
-	"github.com/tikivn/tikit-go-kit/grpc/gatewayopt"
 	"github.com/tikivn/tikit-go-kit/l"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -64,6 +64,7 @@ func createDefaultGatewayConfig() *gatewayConfig {
 		MuxOptions: []runtime.ServeMuxOption{
 			gatewayopt.ProtoJSONMarshaler(),
 			runtime.WithErrorHandler(runtime.DefaultHTTPErrorHandler),
+			runtime.WithRoutingErrorHandler(DefaultRoutingErrorHandler),
 		},
 		ServerHandlers: []HTTPServerHandler{
 			PrometheusHandler,
@@ -103,12 +104,13 @@ func newGatewayServer(c *gatewayConfig, conn *grpc.ClientConn, servers []Service
 		Addr:    c.Addr.String(),
 		Handler: httpMux,
 	}
+
 	if cfg := c.ServerConfig; cfg != nil {
 		cfg.applyTo(svr)
 	}
 
-	for _, svr := range servers {
-		err := svr.RegisterWithMuxServer(context.Background(), mux, conn)
+	for _, sv := range servers {
+		err := sv.RegisterWithMuxServer(context.Background(), mux, conn)
 		if err != nil {
 			return nil, fmt.Errorf("failed to register handler. %w", err)
 		}
@@ -123,7 +125,6 @@ func newGatewayServer(c *gatewayConfig, conn *grpc.ClientConn, servers []Service
 
 // Serve
 func (s *gatewayServer) Serve() error {
-
 	ll.Info("http server starting at", l.String("addr", s.config.Addr.String()))
 	if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		ll.Info("Error starting http server, ", l.Error(err))
