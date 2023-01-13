@@ -37,9 +37,8 @@ type Logger struct {
 // PrintError prints all error with all meta data and line number.
 // It's prefered to be used at top level function.
 //
-//     func DoSomething() (_err error) {
-//         defer ll.PrintError("DoSomething", &_err)
-//
+//	func DoSomething() (_err error) {
+//	    defer ll.PrintError("DoSomething", &_err)
 func (logger Logger) PrintError(msg string, err *error) {
 	if *err != nil {
 		ll.S.Errorf("%v: %+v", msg, *err)
@@ -321,6 +320,7 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		err := enc.Encode(errorResponse{
 			Error: "Only GET and PUT are supported.",
 		})
+
 		if err != nil {
 			panic(err)
 		}
